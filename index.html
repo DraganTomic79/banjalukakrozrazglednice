@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Banja Luka — nekad i danas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=20260914a">
+</head>
+<body>
+
+<div class="app-loading" id="appLoading">
+  <div class="spinner"></div>
+  <div id="appLoadingText">Učitavanje podataka…</div>
+</div>
+
+<header class="site">
+  <div class="nav-wrap">
+    <a href="#" class="brand" onclick="goHome();return false;">
+      <svg class="brand-mark" viewBox="0 0 34 34" fill="none">
+        <rect x="1" y="4" width="32" height="22" rx="1.5" stroke="#2B2620" stroke-width="1.4" fill="#F6F1E6"/>
+        <circle cx="10.5" cy="12" r="2.6" stroke="#235E55" stroke-width="1.3"/>
+        <path d="M2 23L11 15L17 19L24 12L33 20" stroke="#8B6239" stroke-width="1.3" fill="none"/>
+        <line x1="21" y1="9" x2="30" y2="9" stroke="#9C3B2E" stroke-width="1.2"/>
+        <line x1="21" y1="12" x2="27" y2="12" stroke="#9C3B2E" stroke-width="1.2"/>
+      </svg>
+      <div class="brand-text"><span class="t1">Banja Luka</span><span class="t2">nekad i danas</span></div>
+    </a>
+    <nav class="main-nav" id="mainNav">
+      <button data-view="home" onclick="showView('home');closeMobileNav();">Početna</button>
+      <button data-view="gallery" onclick="showView('gallery');closeMobileNav();">Galerija</button>
+      <button data-view="timeline" onclick="showView('timeline');closeMobileNav();">Vremenska linija</button>
+      <button data-view="admin" onclick="showView('admin');closeMobileNav();">Admin panel</button>
+    </nav>
+    <div class="nav-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="globalSearch" type="text" placeholder="Pretraži po nazivu, lokaciji, godini..." oninput="onGlobalSearch(this.value)">
+    </div>
+    <button class="menu-toggle" onclick="toggleMobileNav()" aria-label="Meni" aria-expanded="false" id="menuToggle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="wrap">
+
+<div class="view active" id="view-home">
+  <section class="cat-section-top">
+    <div class="section-head"><div><span class="eyebrow"><span class="dot"></span>Pregled po temi</span><h2>Kategorije</h2></div></div>
+    <div class="cat-grid" id="categoryGrid"></div>
+  </section>
+
+  <section class="hero">
+    <div class="hero-grid">
+      <div>
+        <span class="eyebrow"><span class="dot"></span>Digitalni arhiv razglednica</span>
+        <h1>Banja Luka kroz stare razglednice</h1>
+        <p class="lead">Digitalna kolekcija koja čuva izgled grada od početka XX vijeka do danas. Istražite ulice, mostove i zdanja onako kako su nekad izgledali — i uporedite sa danas.</p>
+        <div class="hero-actions">
+          <button class="btn" onclick="showView('gallery')">Istraži galeriju</button>
+        </div>
+        <div class="hero-stats">
+          <div><span class="n" id="statTotal">0</span><span class="l">razglednica</span></div>
+          <div><span class="n" id="statCats">0</span><span class="l">kategorija</span></div>
+          <div><span class="n">1900–2026</span><span class="l">raspon perioda</span></div>
+        </div>
+      </div>
+      <div><div class="nd-slider contain-fit" id="heroSlider" style="aspect-ratio:3/2;">
+        <div class="layer before" id="heroBefore"></div>
+        <div class="layer after" id="heroAfter"></div>
+        <span class="nd-tag before" id="heroTagBefore">Nekad</span>
+        <span class="nd-tag after">Danas</span>
+        <div class="handle"></div>
+        <input type="range" min="0" max="100" value="50" oninput="dragSlider(this,'heroBefore','heroAfter')">
+      </div></div>
+    </div>
+  </section>
+</div>
+
+<div class="view" id="view-gallery">
+  <section style="padding-top:36px;padding-bottom:20px;">
+    <span class="eyebrow"><span class="dot"></span>Cijela kolekcija</span>
+    <h1 style="font-size:32px;">Galerija razglednica</h1>
+    <p style="margin-top:10px;max-width:520px;">Filtrirajte po periodu, kategoriji i lokaciji, ili pretražite po ključnoj riječi.</p>
+  </section>
+  <section style="padding-top:0;">
+    <div class="gallery-toolbar">
+      <select id="fCategory" onchange="applyFilters()"></select>
+      <select id="fPeriod" onchange="applyFilters()"></select>
+      <select id="fLocation" onchange="applyFilters()"></select>
+      <input type="text" id="fSearch" placeholder="Pretraga..." oninput="applyFilters()" style="min-width:180px;">
+      <span class="count" id="galleryCount"></span>
+    </div>
+    <div class="pc-grid" id="galleryGrid"></div>
+    <div class="empty-state" id="galleryEmpty" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <div>Nema razglednica koje odgovaraju filterima.</div>
+    </div>
+  </section>
+</div>
+
+<div class="view" id="view-detail">
+  <section style="padding-top:32px;">
+    <div class="detail-top"><button onclick="showView('gallery')">← Nazad na galeriju</button><span>/</span><span id="crumbCat"></span><span>/</span><span id="crumbTitle"></span></div>
+    <div class="detail-grid">
+      <div class="detail-media"><div id="detailMediaBox"></div><div class="toggle-row" id="detailToggles"></div></div>
+      <div class="detail-info">
+        <div class="tag-row" id="detailTags"></div>
+        <h1 id="detailTitle"></h1>
+        <div class="loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg><span id="detailLoc"></span></div>
+        <p id="detailDesc"></p>
+        <dl class="spec" id="detailSpec"></dl>
+        <div id="detailTranscriptWrap"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn ghost" onclick="openMap()">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>
+            Prikaži na mapi
+          </button>
+        </div>
+        <div class="share-row">
+          <div class="icon-btn" title="Podijeli na Facebooku"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 9h3V6h-3c-1.7 0-3 1.3-3 3v2H8v3h3v7h3v-7h3l1-3h-4v-2c0-.6.4-1 1-1z"/></svg></div>
+          <div class="icon-btn" title="Podijeli na Instagramu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.9" fill="currentColor" stroke="none"/></svg></div>
+          <div class="icon-btn" title="Kopiraj link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1.5 1.5M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="view" id="view-timeline">
+  <section style="padding-top:36px;padding-bottom:10px;">
+    <span class="eyebrow"><span class="dot"></span>Istraživanje kroz period</span>
+    <h1 style="font-size:32px;">Banja Luka kroz vrijeme</h1>
+    <p style="margin-top:10px;max-width:520px;">Odaberite period da vidite razglednice iz tog doba.</p>
+  </section>
+  <section style="padding-top:10px;">
+    <div class="tl-full-rail" id="timelineRailFull"></div>
+    <div class="pc-grid" id="timelineGrid"></div>
+  </section>
+</div>
+
+<div class="view" id="view-admin">
+  <section style="padding-top:36px;padding-bottom:10px;">
+    <span class="eyebrow"><span class="dot"></span>Administracija</span>
+    <h1 style="font-size:32px;">Admin panel</h1>
+    <p style="margin-top:10px;max-width:600px;">Dodajte, izmijenite ili obrišite razglednice, i uploadujte slike direktno sa računara.</p>
+  </section>
+
+  <section id="adminLoginSection" style="padding-top:0;max-width:360px;display:none;">
+    <div class="admin-note" style="margin-bottom:20px;">Admin panel je zaštićen. Prijavite se da nastavite.</div>
+    <form id="loginForm" onsubmit="return handleLogin(event)" class="form-grid" style="gap:14px;">
+      <div class="form-field span2"><label>Email</label><input type="email" id="login_email" required autocomplete="username"></div>
+      <div class="form-field span2"><label>Lozinka</label><input type="password" id="login_pass" required autocomplete="current-password"></div>
+      <div class="form-field span2"><div id="loginError" style="color:var(--red);font-size:13px;display:none;"></div></div>
+      <div class="form-field span2"><button type="submit" class="btn">Prijavi se</button></div>
+    </form>
+  </section>
+
+  <section id="adminListSection" style="padding-top:0;display:none;">
+    <div class="admin-note">Podaci se čuvaju u Firebase bazi (Firestore) — vidljivi svima, na svim uređajima. Slike se otpremaju na ImgBB i samo se njihov link čuva u bazi.</div>
+    <div class="gallery-toolbar">
+      <button class="btn" onclick="openAdminForm()">+ Nova razglednica</button>
+      <span class="count" id="adminCount"></span>
+      <button class="btn ghost" style="margin-left:auto;" onclick="resetAllData()">Vrati na početne podatke</button>
+      <button class="btn ghost" onclick="migrateLocalToFirebase()">Migriraj lokalne podatke</button>
+      <button class="btn ghost" onclick="exportLocalData()">Izvezi lokalne podatke (JSON)</button>
+      <button class="btn ghost" onclick="document.getElementById('importFile').click()">Uvezi iz JSON fajla</button>
+      <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importJsonFile(event)">
+      <button class="btn ghost" onclick="handleLogout()">Odjavi se</button>
+    </div>
+    <div style="overflow-x:auto;"><table class="admin-table" id="adminTable"></table></div>
+  </section>
+
+  <section id="adminFormSection" style="padding-top:0;display:none;">
+    <h2 id="formHeading" style="font-size:22px;margin-bottom:22px;">Nova razglednica</h2>
+    <form id="pcForm" onsubmit="return submitAdminForm(event)">
+      <div class="form-grid">
+        <div class="form-field"><label>Naslov *</label><input type="text" id="f_title" required></div>
+        <div class="form-field"><label>Kategorija *</label><select id="f_cat" required></select></div>
+        <div class="form-field"><label>Lokacija</label><input type="text" id="f_loc"></div>
+        <div class="form-field"><label>Godina / period (prikaz)</label><input type="text" id="f_year" placeholder="npr. oko 1935."><div class="field-hint">Tekst koji se prikazuje korisniku uz razglednicu. Ako je godina sigurna, upiši je tačno (npr. "1972."), a ako je procijenjena, koristi "oko 1935." — uvijek sa tačkom na kraju.</div></div>
+        <div class="form-field"><label>Period (za filtriranje)</label><input type="text" id="f_period" placeholder="npr. 1920–1940"><div class="field-hint">Koristi se za filtere i Vremensku liniju. Upiši 20-godišnji raspon kojem godina pripada (npr. za 1972. to je "1960–1980"), a ne pojedinačnu godinu — inače će razglednica ispasti van postojećih perioda na vremenskoj liniji.</div></div>
+        <div class="form-field"><label>Izdavač</label><input type="text" id="f_izdavac"></div>
+        <div class="form-field"><label>Poštanski žig</label><input type="text" id="f_postmark" placeholder="datum, ako postoji"><div class="field-hint">Tačan datum utisnut na poštanskom žigu na marki (format dan.mjesec.godina, npr. "5.11.1974"), ne procijenjena godina razglednice. Ako žig nije čitljiv ili ga nema, ostavi polje prazno.</div></div>
+        <div class="form-field"><label>Status prava</label>
+          <select id="f_prava">
+            <option value="nepoznato">nepoznato</option>
+            <option value="poznato">poznato</option>
+            <option value="javna domena">javna domena</option>
+            <option value="dozvola">dozvola</option>
+          </select>
+        </div>
+        <div class="form-field"><label>GPS — lat</label><input type="text" id="f_lat" placeholder="44.7722"></div>
+        <div class="form-field"><label>GPS — lng</label><input type="text" id="f_lng" placeholder="17.1910"></div>
+        <div class="form-field span2"><label>Tagovi (odvojeni zarezom)</label><input type="text" id="f_tags" placeholder="centar, ulica, Vrbas"></div>
+        <div class="form-field span2"><label>Opis</label><textarea id="f_desc" rows="3"></textarea></div>
+        <div class="form-field span2"><label>Tekst sa poleđine (transkripcija)</label><textarea id="f_transcript" rows="2"></textarea></div>
+        <div class="form-field"><label class="check"><input type="checkbox" id="f_public" checked> Javna (vidljiva na sajtu)</label></div>
+      </div>
+
+      <div class="upload-grid">
+        <div class="upload-box"><label>Prednja strana</label><div class="upload-preview" id="prevFront">nema slike</div><input type="file" accept="image/*" id="f_front_file"></div>
+        <div class="upload-box"><label>Poleđina</label><div class="upload-preview" id="prevBack">nema slike</div><input type="file" accept="image/*" id="f_back_file"></div>
+        <div class="upload-box"><label>Današnja fotografija</label><div class="upload-preview" id="prevToday">nema slike</div><input type="file" accept="image/*" id="f_today_file"></div>
+      </div>
+      <p id="formError" style="display:none;"></p>
+      <div style="display:flex;gap:10px;margin-top:22px;flex-wrap:wrap;">
+        <button type="submit" class="btn" id="saveBtn">Sačuvaj</button>
+        <button type="button" class="btn ghost" onclick="closeAdminForm()">Otkaži</button>
+        <button type="button" class="btn ghost" id="deleteBtn" style="display:none;margin-left:auto;color:var(--red);border-color:var(--red);" onclick="deleteFromForm()">Obriši razglednicu</button>
+      </div>
+    </form>
+  </section>
+</div>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div style="max-width:280px;">
+        <div class="brand-text" style="margin-bottom:10px;"><span class="t1" style="font-size:16px;">Banja Luka — nekad i danas</span></div>
+        <p style="font-size:13px;">Digitalni arhiv starih razglednica Banje Luke. Projekat raste iz privatne kolekcije od 100+ razglednica.</p>
+      </div>
+      <div><h3>Istraži</h3><ul>
+        <li><a href="#" onclick="showView('gallery');return false;">Galerija</a></li>
+        <li><a href="#" onclick="showView('timeline');return false;">Vremenska linija</a></li>
+        <li><a href="#" onclick="showView('admin');return false;">Admin panel</a></li>
+      </ul></div>
+      <div><h3>Projekat</h3><ul>
+        <li>Pošaljite svoju razglednicu</li>
+        <li>Podržite digitalizaciju</li>
+        <li>O kolekciji</li>
+      </ul></div>
+    </div>
+    <div class="footer-note"><span>© 2026 Banja Luka — nekad i danas</span><span>Podaci: Firebase · Slike: ImgBB</span></div>
+  </div>
+</footer>
+
+<div class="qr-overlay" id="qrModal">
+  <div class="qr-modal">
+    <button class="qr-close" onclick="closeQrModal()" aria-label="Zatvori">✕</button>
+    <div class="qr-print-area" id="qrPrintArea">
+      <div class="qr-box" id="qrBox"></div>
+      <div class="qr-id" id="qrId"></div>
+      <div class="qr-title" id="qrTitle"></div>
+      <div class="qr-sub">Banja Luka — nekad i danas</div>
+    </div>
+    <div class="qr-actions">
+      <button class="btn" onclick="printQr()">Štampaj</button>
+      <button class="btn ghost" onclick="downloadQrSvg()">Preuzmi SVG</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-auth-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="qrcode.js?v=20260919a"></script>
+<script src="data.js?v=20260914a"></script>
+<script src="app.js?v=20260919b"></script>
+</body>
+</html>
