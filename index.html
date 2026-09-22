@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20260921a">
+<link rel="stylesheet" href="style.css?v=20260922a">
 </head>
 <body>
 
@@ -171,14 +171,40 @@
     <div class="gallery-toolbar">
       <button class="btn" onclick="openAdminForm()">+ Nova razglednica</button>
       <span class="count" id="adminCount"></span>
-      <button class="btn ghost" style="margin-left:auto;" onclick="resetAllData()">Vrati na početne podatke</button>
-      <button class="btn ghost" onclick="migrateLocalToFirebase()">Migriraj lokalne podatke</button>
-      <button class="btn ghost" onclick="exportLocalData()">Izvezi lokalne podatke (JSON)</button>
-      <button class="btn ghost" onclick="document.getElementById('importFile').click()">Uvezi iz JSON fajla</button>
+    </div>
+    <div class="admin-toolbar-secondary">
+      <button class="btn ghost sm" onclick="resetAllData()">Vrati na početne podatke</button>
+      <button class="btn ghost sm" onclick="migrateLocalToFirebase()">Migriraj lokalne podatke</button>
+      <button class="btn ghost sm" onclick="exportLocalData()">Izvezi lokalne podatke (JSON)</button>
+      <button class="btn ghost sm" onclick="document.getElementById('importFile').click()">Uvezi iz JSON fajla</button>
       <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importJsonFile(event)">
-      <button class="btn ghost" onclick="handleLogout()">Odjavi se</button>
+      <button class="btn ghost sm" onclick="fixHistorijaTypo()">Ispravi "historija"→"istorija"</button>
+      <button class="btn ghost sm" style="margin-left:auto;" onclick="handleLogout()">Odjavi se</button>
     </div>
     <div style="overflow-x:auto;"><table class="admin-table" id="adminTable"></table></div>
+
+    <div class="cat-manager">
+      <h2 style="font-size:19px;margin:38px 0 4px;">Kategorije</h2>
+      <p style="font-size:13px;color:var(--ink-soft);margin-bottom:16px;">Dodajte ili obrišite kategorije. Nova kategorija se odmah pojavljuje u padajućoj listi pri dodavanju/izmjeni razglednice i na naslovnoj strani.</p>
+      <div class="cat-manage-add">
+        <input type="text" id="newCatName" placeholder="Naziv nove kategorije, npr. Škole">
+        <select id="newCatIcon">
+          <option value="building">Zgrada</option>
+          <option value="street">Ulica</option>
+          <option value="bridge">Most</option>
+          <option value="castle">Kastel / tvrđava</option>
+          <option value="church">Vjerski objekat</option>
+          <option value="monument">Spomenik</option>
+          <option value="train">Željeznica / saobraćaj</option>
+          <option value="tree">Park / priroda</option>
+          <option value="houses">Naselje</option>
+          <option value="panorama">Panorama</option>
+          <option value="people">Ljudi / život u gradu</option>
+        </select>
+        <button class="btn sm" onclick="addCategory()">+ Dodaj kategoriju</button>
+      </div>
+      <div id="categoryManagerList" class="cat-manage-list"></div>
+    </div>
   </section>
 
   <section id="adminFormSection" style="padding-top:0;display:none;">
@@ -268,7 +294,7 @@
 <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-auth-compat.js"></script>
 <script src="firebase-init.js"></script>
 <script src="qrcode.js?v=20260919a"></script>
-<script src="data.js?v=20260921a"></script>
+<script src="data.js?v=20260922a"></script>
 <script src="app.js?v=20260919b"></script>
 </body>
 </html>

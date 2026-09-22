@@ -1,10 +1,11 @@
 /* ===================== KATEGORIJE I IKONICE ===================== */
-const CATS = [
+const DEFAULT_CATS = [
   {id:'arh', name:'Arhitektura i zgrade', icon:'building'},
   {id:'ulice', name:'Ulice i trgovi', icon:'street'},
   {id:'vrbas', name:'Vrbas i mostovi', icon:'bridge'},
   {id:'kastel', name:'Kastel', icon:'castle'},
   {id:'vjera', name:'Vjerski objekti', icon:'church'},
+  {id:'spomenici', name:'Spomenici', icon:'monument'},
   {id:'zeljeznica', name:'Željeznica i saobraćaj', icon:'train'},
   {id:'parkovi', name:'Parkovi i priroda', icon:'tree'},
   {id:'naselja', name:'Naselja', icon:'houses'},
@@ -17,6 +18,7 @@ const ICONS = {
   bridge:'<path d="M2 16c3-4 6-4 10-4s7 0 10 4M4 16v4M20 16v4M9 12v-3M15 12v-3M12 9V6"/>',
   castle:'<path d="M4 21V10h3V7h3V4h4v3h3v3h3v11z" stroke-linejoin="round"/><path d="M4 10h16M9 21v-5h6v5"/>',
   church:'<path d="M12 3v3M10 5h4M6 21V11L12 6l6 5v10z" stroke-linejoin="round"/><path d="M6 21h12M12 21v-6h0"/>',
+  monument:'<path d="M10 21V9l2-5 2 5v12" stroke-linejoin="round"/><path d="M7 21h10M9 13h6"/>',
   train:'<rect x="5" y="4" width="14" height="12" rx="2"/><path d="M5 12h14M8 20l-2 2M16 20l2 2M8 8h2M14 8h2"/>',
   tree:'<path d="M12 3l5 7h-3l4 5h-4v6h-4v-6H6l4-5H7z" stroke-linejoin="round"/>',
   houses:'<path d="M3 21V11l5-4 5 4v10M13 21v-7l4-3 4 3v7" stroke-linejoin="round"/>',

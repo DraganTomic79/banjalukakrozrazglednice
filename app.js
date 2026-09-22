@@ -1,8 +1,14 @@
 /* ===================== PODACI (Firebase Firestore) ===================== */
 let POSTCARDS = [];
+let CATS = [];
+const CATEGORIES_COLLECTION = 'categories';
 
 async function fetchPostcardsFromFirestore(){
   const snap = await db.collection(POSTCARDS_COLLECTION).orderBy('id').get();
+  return snap.docs.map(d=>d.data());
+}
+async function fetchCategoriesFromFirestore(){
+  const snap = await db.collection(CATEGORIES_COLLECTION).get();
   return snap.docs.map(d=>d.data());
 }
 async function saveOnePostcard(pc){
@@ -10,6 +16,77 @@ async function saveOnePostcard(pc){
 }
 async function deleteOnePostcard(id){
   await db.collection(POSTCARDS_COLLECTION).doc(id).delete();
+}
+
+function slugify(name){
+  return (name||'').toLowerCase()
+    .replace(/č/g,'c').replace(/ć/g,'c').replace(/š/g,'s').replace(/đ/g,'dj').replace(/ž/g,'z')
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') || 'kategorija';
+}
+function renderCategoryManager(){
+  const el = document.getElementById('categoryManagerList');
+  if(!el) return;
+  el.innerHTML = CATS.map(c=>{
+    const n = POSTCARDS.filter(p=>p.cat===c.id).length;
+    return `<div class="cat-manage-row">${iconSvg(c.icon,18)}<span class="cm-name">${c.name}</span><span class="cm-count">${n} razgl.</span><button class="cm-del" onclick="deleteCategory('${c.id}')" title="Obriši kategoriju">✕</button></div>`;
+  }).join('');
+}
+async function addCategory(){
+  const nameInput = document.getElementById('newCatName');
+  const iconSelect = document.getElementById('newCatIcon');
+  const name = nameInput.value.trim();
+  if(!name){ alert('Unesite naziv kategorije.'); return; }
+  let id = slugify(name);
+  if(CATS.find(c=>c.id===id)){
+    let n=2; while(CATS.find(c=>c.id===id+'-'+n)) n++;
+    id = id+'-'+n;
+  }
+  const cat = {id, name, icon: iconSelect.value};
+  try{
+    await db.collection(CATEGORIES_COLLECTION).doc(id).set(cat);
+  }catch(e){
+    console.error(e);
+    alert('Dodavanje kategorije nije uspjelo. Provjerite internet konekciju.');
+    return;
+  }
+  CATS.push(cat);
+  nameInput.value = '';
+  renderCategoryManager();
+  refreshAdminCategorySelect();
+}
+async function deleteCategory(id){
+  const inUse = POSTCARDS.filter(p=>p.cat===id).length;
+  const msg = inUse>0
+    ? ('Ova kategorija se koristi na '+inUse+' razglednic'+(inUse===1?'i':(inUse<5?'e':'a'))+'. Ako je obrišete, te razglednice ostaju bez kategorije (prikazivaće se kao "Nekategorisano"). Nastaviti?')
+    : 'Obrisati ovu kategoriju?';
+  if(!confirm(msg)) return;
+  try{
+    await db.collection(CATEGORIES_COLLECTION).doc(id).delete();
+  }catch(e){
+    console.error(e);
+    alert('Brisanje nije uspjelo. Provjerite internet konekciju.');
+    return;
+  }
+  CATS = CATS.filter(c=>c.id!==id);
+  renderCategoryManager();
+  refreshAdminCategorySelect();
+}
+async function fixHistorijaTypo(){
+  const hasHistori = s => typeof s==='string' && /histor/i.test(s);
+  const affected = POSTCARDS.filter(p=>hasHistori(p.opis)||hasHistori(p.transcript)||hasHistori(p.title));
+  if(!affected.length){ alert('Nije pronađen nijedan unos sa "historija/historijski" u naslovu, opisu ili transkripciji.'); return; }
+  if(!confirm('Pronađeno '+affected.length+' razglednic'+(affected.length===1?'a':(affected.length<5?'e':'a'))+' sa "histor…" u tekstu. Zamijeniti svako "historija/historijski/…" sa "istorija/istorijski/…"? Nastaviti?')) return;
+  const fix = s => typeof s==='string' ? s.replace(/Histor/g,'Istor').replace(/histor/g,'istor') : s;
+  let ok=0, failed=0;
+  for(const pc of affected){
+    pc.title = fix(pc.title);
+    pc.opis = fix(pc.opis);
+    pc.transcript = fix(pc.transcript);
+    try{ await saveOnePostcard(pc); ok++; }
+    catch(e){ console.error(e); failed++; }
+  }
+  alert('Ispravljeno: '+ok+' razglednica'+(failed?(', neuspješno: '+failed+' (provjerite konzolu).'):'.'));
+  renderAdminTable();
 }
 
 function periods(){
@@ -524,6 +601,7 @@ function renderAdminTable(){
     </tr>`;
   }).join('');
   document.getElementById('adminTable').innerHTML = `<thead><tr><th>Slika</th><th>ID</th><th>Naslov</th><th>Kategorija</th><th>Godina</th><th>Javna</th><th>Akcije</th></tr></thead><tbody>${rows}</tbody>`;
+  renderCategoryManager();
 }
 
 /* ===================== QR KOD ===================== */
@@ -600,6 +678,11 @@ function goHome(){ showView('home'); }
 async function initApp(){
   try{
     POSTCARDS = await fetchPostcardsFromFirestore();
+    CATS = await fetchCategoriesFromFirestore();
+    if(!CATS.length){
+      CATS = JSON.parse(JSON.stringify(DEFAULT_CATS));
+      for(const c of CATS){ await db.collection(CATEGORIES_COLLECTION).doc(c.id).set(c); }
+    }
   }catch(e){
     console.error('Greška pri učitavanju iz Firebase-a', e);
     const el = document.getElementById('appLoading');
