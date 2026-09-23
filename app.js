@@ -111,9 +111,9 @@ function renderHome(){
     document.getElementById('heroSlider').innerHTML = '<div class="empty-state">Dodajte prvu razglednicu u admin panelu.</div>';
   }
 
-  document.getElementById('categoryGrid').innerHTML = CATS.map(c=>{
+  document.getElementById('categoryDropdown').innerHTML = '<option value="">Sve kategorije</option>' + CATS.map(c=>{
     const n = list.filter(p=>p.cat===c.id).length;
-    return `<div class="cat-tile" onclick="filterByCategory('${c.id}')">${iconSvg(c.icon)}<span class="name">${c.name} <span class="count">(${n})</span></span></div>`;
+    return `<option value="${c.id}">${c.name} (${n})</option>`;
   }).join('');
 }
 
