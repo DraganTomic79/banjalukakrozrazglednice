@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20260922a">
+<link rel="stylesheet" href="style.css?v=20260923a">
 </head>
 <body>
 
@@ -211,6 +211,7 @@
     <h2 id="formHeading" style="font-size:22px;margin-bottom:22px;">Nova razglednica</h2>
     <form id="pcForm" onsubmit="return submitAdminForm(event)">
       <div class="form-grid">
+        <div class="form-field"><label>ID</label><input type="text" id="f_id" placeholder="npr. BL-0009"><div class="field-hint" id="idHint">Predloženo automatski — možeš promijeniti prije čuvanja. Mora biti jedinstven.</div></div>
         <div class="form-field"><label>Naslov *</label><input type="text" id="f_title" required></div>
         <div class="form-field"><label>Kategorija *</label><select id="f_cat" required></select></div>
         <div class="form-field"><label>Lokacija</label><input type="text" id="f_loc"></div>
@@ -294,7 +295,7 @@
 <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-auth-compat.js"></script>
 <script src="firebase-init.js"></script>
 <script src="qrcode.js?v=20260919a"></script>
-<script src="data.js?v=20260922a"></script>
+<script src="data.js?v=20260923a"></script>
 <script src="app.js?v=20260919b"></script>
 </body>
 </html>
