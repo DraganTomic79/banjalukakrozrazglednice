@@ -376,8 +376,8 @@ function openAdminForm(id){
   if(id){
     const pc = POSTCARDS.find(p=>p.id===id);
     document.getElementById('f_id').value = pc.id;
-    document.getElementById('f_id').disabled = true;
-    document.getElementById('idHint').textContent = 'ID postojeće razglednice se ne može mijenjati.';
+    document.getElementById('f_id').disabled = false;
+    document.getElementById('idHint').textContent = 'Pažljivo — promjena ID-ja postojeće razglednice mijenja i njen link (npr. za QR kod). Mora ostati jedinstven.';
     document.getElementById('f_title').value = pc.title||'';
     document.getElementById('f_cat').value = pc.cat||'';
     document.getElementById('f_loc').value = pc.loc||'';
@@ -423,7 +423,19 @@ async function submitAdminForm(event){
     return false;
   }
   let newId = editingId;
-  if(!editingId){
+  let renaming = false;
+  if(editingId){
+    const typedId = document.getElementById('f_id').value.trim();
+    if(typedId && typedId !== editingId){
+      if(POSTCARDS.find(p=>p.id===typedId)){
+        err.textContent = 'ID "'+typedId+'" je već zauzet. Izaberite drugi ID.';
+        err.style.display = 'block';
+        return false;
+      }
+      newId = typedId;
+      renaming = true;
+    }
+  } else {
     newId = document.getElementById('f_id').value.trim() || nextId();
     if(POSTCARDS.find(p=>p.id===newId)){
       err.textContent = 'ID "'+newId+'" je već zauzet. Izaberite drugi ID.';
@@ -457,6 +469,7 @@ async function submitAdminForm(event){
   if(saveBtn){ saveBtn.disabled = true; saveBtn.textContent = 'Čuvanje…'; }
   try{
     await saveOnePostcard(data);
+    if(renaming){ await deleteOnePostcard(editingId); }
   }catch(e){
     console.error(e);
     alert('Snimanje u Firebase nije uspjelo. Provjerite internet konekciju i probajte ponovo.');
@@ -466,7 +479,8 @@ async function submitAdminForm(event){
   if(saveBtn){ saveBtn.disabled = false; saveBtn.textContent = 'Sačuvaj'; }
   if(editingId){
     const idx = POSTCARDS.findIndex(p=>p.id===editingId);
-    POSTCARDS[idx] = data;
+    if(renaming){ POSTCARDS.splice(idx,1); POSTCARDS.push(data); }
+    else { POSTCARDS[idx] = data; }
   } else {
     POSTCARDS.push(data);
   }
