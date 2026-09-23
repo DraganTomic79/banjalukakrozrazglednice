@@ -375,6 +375,9 @@ function openAdminForm(id){
   document.getElementById('pcForm').reset();
   if(id){
     const pc = POSTCARDS.find(p=>p.id===id);
+    document.getElementById('f_id').value = pc.id;
+    document.getElementById('f_id').disabled = true;
+    document.getElementById('idHint').textContent = 'ID postojeće razglednice se ne može mijenjati.';
     document.getElementById('f_title').value = pc.title||'';
     document.getElementById('f_cat').value = pc.cat||'';
     document.getElementById('f_loc').value = pc.loc||'';
@@ -395,6 +398,9 @@ function openAdminForm(id){
     document.getElementById('f_public').checked = true;
     currentImages = {front:null, back:null, today:null};
     document.getElementById('deleteBtn').style.display = 'none';
+    document.getElementById('f_id').disabled = false;
+    document.getElementById('f_id').value = nextId();
+    document.getElementById('idHint').textContent = 'Predloženo automatski — možeš promijeniti prije čuvanja. Mora biti jedinstven.';
   }
   updateUploadPreview('front'); updateUploadPreview('back'); updateUploadPreview('today');
   document.getElementById('adminListSection').style.display = 'none';
@@ -416,9 +422,18 @@ async function submitAdminForm(event){
     err.style.display = 'block';
     return false;
   }
+  let newId = editingId;
+  if(!editingId){
+    newId = document.getElementById('f_id').value.trim() || nextId();
+    if(POSTCARDS.find(p=>p.id===newId)){
+      err.textContent = 'ID "'+newId+'" je već zauzet. Izaberite drugi ID.';
+      err.style.display = 'block';
+      return false;
+    }
+  }
   err.style.display = 'none';
   const data = {
-    id: editingId || nextId(),
+    id: newId,
     title: title,
     cat: cat,
     loc: document.getElementById('f_loc').value.trim(),
