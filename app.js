@@ -71,23 +71,6 @@ async function deleteCategory(id){
   renderCategoryManager();
   refreshAdminCategorySelect();
 }
-async function fixHistorijaTypo(){
-  const hasHistori = s => typeof s==='string' && /histor/i.test(s);
-  const affected = POSTCARDS.filter(p=>hasHistori(p.opis)||hasHistori(p.transcript)||hasHistori(p.title));
-  if(!affected.length){ alert('Nije pronađen nijedan unos sa "historija/historijski" u naslovu, opisu ili transkripciji.'); return; }
-  if(!confirm('Pronađeno '+affected.length+' razglednic'+(affected.length===1?'a':(affected.length<5?'e':'a'))+' sa "histor…" u tekstu. Zamijeniti svako "historija/historijski/…" sa "istorija/istorijski/…"? Nastaviti?')) return;
-  const fix = s => typeof s==='string' ? s.replace(/Histor/g,'Istor').replace(/histor/g,'istor') : s;
-  let ok=0, failed=0;
-  for(const pc of affected){
-    pc.title = fix(pc.title);
-    pc.opis = fix(pc.opis);
-    pc.transcript = fix(pc.transcript);
-    try{ await saveOnePostcard(pc); ok++; }
-    catch(e){ console.error(e); failed++; }
-  }
-  alert('Ispravljeno: '+ok+' razglednica'+(failed?(', neuspješno: '+failed+' (provjerite konzolu).'):'.'));
-  renderAdminTable();
-}
 
 function periods(){
   const set = [...new Set(POSTCARDS.map(p=>p.period).filter(Boolean))];
@@ -527,19 +510,6 @@ async function toggleField(id, field){
     alert('Izmjena nije sačuvana u Firebase-u. Provjerite internet konekciju.');
   }
 }
-async function resetAllData(){
-  if(!confirm('Ovo briše sve trenutne razglednice u Firebase bazi i vraća početnih 12 razglednica. Nastaviti?')) return;
-  try{
-    for(const pc of POSTCARDS){ await deleteOnePostcard(pc.id); }
-    const defaults = JSON.parse(JSON.stringify(DEFAULT_POSTCARDS));
-    for(const pc of defaults){ await saveOnePostcard(pc); }
-    POSTCARDS = defaults;
-  }catch(e){
-    console.error(e);
-    alert('Vraćanje na početne podatke nije uspjelo. Provjerite internet konekciju.');
-  }
-  renderAdminTable();
-}
 async function duplicatePostcard(id){
   const pc = POSTCARDS.find(p=>p.id===id);
   if(!pc) return;
@@ -556,68 +526,21 @@ async function duplicatePostcard(id){
   POSTCARDS.push(copy);
   openAdminForm(copy.id);
 }
-function exportLocalData(){
-  const raw = localStorage.getItem('bl_nekad_i_danas_v1');
-  if(!raw){ alert('Nema lokalno sačuvanih podataka u ovom browseru za izvoz.'); return; }
-  const blob = new Blob([raw], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'razglednice-export.json';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(a.href);
-}
-async function migrateList(list){
-  if(!Array.isArray(list) || !list.length){ alert('Fajl ne sadrži nijednu razglednicu.'); return; }
-  if(!confirm('Ovo će '+list.length+' razglednica (uključujući slike) prebaciti u Firebase i ImgBB. Slike koje već imaju http link se preskaču. Može potrajati — ne zatvarajte stranicu. Nastaviti?')) return;
-  let ok = 0, failed = 0;
-  for(const pc of list){
-    try{
-      for(const key of ['frontImg','backImg','todayImg']){
-        if(pc[key] && typeof pc[key]==='string' && pc[key].startsWith('data:')){
-          pc[key] = await uploadToImgbb(pc[key]);
-        }
-      }
-      await saveOnePostcard(pc);
-      ok++;
-    }catch(e){
-      console.error('Migracija nije uspjela za', pc.id, e);
-      failed++;
-    }
-  }
-  alert('Migracija završena: '+ok+' uspješno'+(failed?(', '+failed+' neuspješno (provjerite konzolu).'):'.'));
-  try{
-    POSTCARDS = await fetchPostcardsFromFirestore();
-  }catch(e){ console.error(e); }
-  renderAdminTable();
-}
-async function migrateLocalToFirebase(){
-  const raw = localStorage.getItem('bl_nekad_i_danas_v1');
-  if(!raw){
-    alert('Nema lokalno sačuvanih podataka u OVOM browseru/sajtu za migraciju.\n\nAko ste razglednice unosili otvaranjem fajla direktno sa računara (dupli klik na index.html) ili na drugom uređaju, to su odvojeni "browser" prostori — ovo dugme ih ne vidi.\n\nUmjesto toga: tamo gdje ste unosili podatke kliknite "Izvezi lokalne podatke (JSON)", pa se taj fajl prenesite ovdje i kliknite "Uvezi iz JSON fajla".');
-    return;
-  }
-  let list;
-  try{ list = JSON.parse(raw); }catch(e){ alert('Lokalni podaci nisu čitljivi.'); return; }
-  await migrateList(list);
-}
-function importJsonFile(e){
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = async function(ev){
-    let list;
-    try{ list = JSON.parse(ev.target.result); }catch(err){ alert('Izabrani fajl nije validan JSON.'); e.target.value=''; return; }
-    await migrateList(list);
-    e.target.value = '';
-  };
-  reader.onerror = function(){ alert('Čitanje fajla nije uspjelo.'); e.target.value=''; };
-  reader.readAsText(file);
-}
 function renderAdminTable(){
   document.getElementById('adminCount').textContent = POSTCARDS.length+' razglednica ukupno';
-  const rows = POSTCARDS.map(pc=>{
+  const sortSel = document.getElementById('adminSort');
+  const sortBy = sortSel ? sortSel.value : 'id';
+  const sorted = [...POSTCARDS].sort((a,b)=>{
+    if(sortBy==='title') return (a.title||'').localeCompare(b.title||'','bs');
+    if(sortBy==='cat') return catInfo(a.cat).name.localeCompare(catInfo(b.cat).name,'bs');
+    if(sortBy==='year'){
+      const ay = parseInt(((a.year||'').match(/\d{3,4}/)||[0])[0]) || 0;
+      const by = parseInt(((b.year||'').match(/\d{3,4}/)||[0])[0]) || 0;
+      return ay - by;
+    }
+    return (a.id||'').localeCompare(b.id||'');
+  });
+  const rows = sorted.map(pc=>{
     const c = catInfo(pc.cat);
     return `<tr>
       <td><div class="admin-thumb">${mediaFor(pc,'before')}</div></td>

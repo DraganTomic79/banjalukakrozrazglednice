@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20260923a">
+<link rel="stylesheet" href="style.css?v=20260923b">
 </head>
 <body>
 
@@ -170,15 +170,13 @@
     <div class="admin-note">Podaci se čuvaju u Firebase bazi (Firestore) — vidljivi svima, na svim uređajima. Slike se otpremaju na ImgBB i samo se njihov link čuva u bazi.</div>
     <div class="gallery-toolbar">
       <button class="btn" onclick="openAdminForm()">+ Nova razglednica</button>
+      <select id="adminSort" onchange="renderAdminTable()">
+        <option value="id">Sortiraj: ID</option>
+        <option value="title">Sortiraj: Naziv</option>
+        <option value="cat">Sortiraj: Kategorija</option>
+        <option value="year">Sortiraj: Godina</option>
+      </select>
       <span class="count" id="adminCount"></span>
-    </div>
-    <div class="admin-toolbar-secondary">
-      <button class="btn ghost sm" onclick="resetAllData()">Vrati na početne podatke</button>
-      <button class="btn ghost sm" onclick="migrateLocalToFirebase()">Migriraj lokalne podatke</button>
-      <button class="btn ghost sm" onclick="exportLocalData()">Izvezi lokalne podatke (JSON)</button>
-      <button class="btn ghost sm" onclick="document.getElementById('importFile').click()">Uvezi iz JSON fajla</button>
-      <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importJsonFile(event)">
-      <button class="btn ghost sm" onclick="fixHistorijaTypo()">Ispravi "historija"→"istorija"</button>
       <button class="btn ghost sm" style="margin-left:auto;" onclick="handleLogout()">Odjavi se</button>
     </div>
     <div style="overflow-x:auto;"><table class="admin-table" id="adminTable"></table></div>
@@ -295,7 +293,7 @@
 <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-auth-compat.js"></script>
 <script src="firebase-init.js"></script>
 <script src="qrcode.js?v=20260919a"></script>
-<script src="data.js?v=20260923a"></script>
+<script src="data.js?v=20260923b"></script>
 <script src="app.js?v=20260919b"></script>
 </body>
 </html>
