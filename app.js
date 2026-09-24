@@ -113,7 +113,7 @@ function renderHome(){
 
   document.getElementById('categoryDropdown').innerHTML = '<option value="">Sve kategorije</option>' + CATS.map(c=>{
     const n = list.filter(p=>p.cat===c.id).length;
-    return `<option value="${c.id}">${c.name} (${n})</option>`;
+    return n>0 ? `<option value="${c.id}">${c.name} (${n})</option>` : '';
   }).join('');
 }
 
@@ -124,10 +124,25 @@ function refreshGalleryFilters(){
   const locSel = document.getElementById('fLocation');
   const prevCat = catSel.value, prevPer = perSel.value, prevLoc = locSel.value;
   catSel.innerHTML = '<option value="">Sve kategorije</option>' + CATS.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
-  perSel.innerHTML = '<option value="">Svi periodi</option>' + periods().map(p=>`<option value="${p}">${p}</option>`).join('');
-  const locs = [...new Set(publicList().map(p=>p.loc).filter(Boolean))].sort();
+  catSel.value = prevCat;
+  refreshPeriodLocationOptions(prevPer, prevLoc);
+}
+function refreshPeriodLocationOptions(keepPer, keepLoc){
+  const catSel = document.getElementById('fCategory');
+  const perSel = document.getElementById('fPeriod');
+  const locSel = document.getElementById('fLocation');
+  const scoped = publicList().filter(p=> !catSel.value || p.cat===catSel.value);
+  const per = new Set(scoped.map(p=>p.period).filter(Boolean));
+  const orderedPeriods = periods().filter(p=>per.has(p));
+  perSel.innerHTML = '<option value="">Svi periodi</option>' + orderedPeriods.map(p=>`<option value="${p}">${p}</option>`).join('');
+  const locs = [...new Set(scoped.map(p=>p.loc).filter(Boolean))].sort();
   locSel.innerHTML = '<option value="">Sve lokacije</option>' + locs.map(l=>`<option value="${l}">${l}</option>`).join('');
-  catSel.value = prevCat; perSel.value = prevPer; locSel.value = prevLoc;
+  perSel.value = orderedPeriods.includes(keepPer) ? keepPer : '';
+  locSel.value = locs.includes(keepLoc) ? keepLoc : '';
+}
+function onCategoryFilterChange(){
+  refreshPeriodLocationOptions('', '');
+  applyFilters();
 }
 function applyFilters(){
   const cat = document.getElementById('fCategory').value;
@@ -148,7 +163,12 @@ function applyFilters(){
   document.getElementById('galleryCount').textContent = results.length+' od '+publicList().length+' razglednica';
   document.getElementById('galleryEmpty').style.display = results.length===0?'block':'none';
 }
-function filterByCategory(catId){ showView('gallery'); document.getElementById('fCategory').value = catId; applyFilters(); }
+function filterByCategory(catId){
+  showView('gallery');
+  document.getElementById('fCategory').value = catId;
+  refreshPeriodLocationOptions('', '');
+  applyFilters();
+}
 function onGlobalSearch(val){ showView('gallery'); document.getElementById('fSearch').value = val; applyFilters(); }
 
 /* ===================== DETALJI ===================== */
