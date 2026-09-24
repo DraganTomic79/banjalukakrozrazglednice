@@ -90,7 +90,7 @@ function nextId(){
 function pcCardHtml(pc){
   const c = catInfo(pc.cat);
   return `<div class="pc-card" onclick="openDetail('${pc.id}')">
-    <div class="pc-photo">${mediaFor(pc,'before')}<span class="badge">${c.name}</span>${pc.nd?'<span class="badge nd">nekad/danas</span>':''}</div>
+    <div class="pc-photo">${mediaFor(pc,'before')}<span class="badge">${c.name}</span>${pc.todayImg?'<span class="badge nd">nekad/danas</span>':''}</div>
     <div class="pc-body"><div class="pc-title">${pc.title}</div><div class="pc-meta"><span>${pc.loc||''}</span><span>${pc.year||''}</span></div><div class="pc-id">${pc.id}</div></div>
   </div>`;
 }
@@ -100,7 +100,7 @@ function renderHome(){
   document.getElementById('statTotal').textContent = list.length;
   document.getElementById('statCats').textContent = CATS.length;
 
-  const ndList = list.filter(p=>p.nd);
+  const ndList = list.filter(p=>p.todayImg);
   const heroPc = ndList[0] || list[0];
 
   if(heroPc){
@@ -123,7 +123,8 @@ function refreshGalleryFilters(){
   const perSel = document.getElementById('fPeriod');
   const locSel = document.getElementById('fLocation');
   const prevCat = catSel.value, prevPer = perSel.value, prevLoc = locSel.value;
-  catSel.innerHTML = '<option value="">Sve kategorije</option>' + CATS.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  const list = publicList();
+  catSel.innerHTML = '<option value="">Sve kategorije</option>' + CATS.filter(c=>list.some(p=>p.cat===c.id)).map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
   catSel.value = prevCat;
   refreshPeriodLocationOptions(prevPer, prevLoc);
 }
@@ -232,7 +233,7 @@ function renderDetailMedia(mode){
     box.innerHTML = `<div class="nd-slider" style="aspect-ratio:4/3;">${mediaFor(pc, mode)}</div>`;
   }
   const toggles = [['front','Prednja strana'],['back','Poleđina']];
-  if(pc.nd) toggles.push(['nd','Nekad / danas']);
+  if(pc.todayImg) toggles.push(['nd','Nekad / danas']);
   document.getElementById('detailToggles').innerHTML = toggles.map(([m,label])=>
     `<button class="toggle-btn ${m===mode?'active':''}" onclick="renderDetailMedia('${m}')">${label}</button>`).join('');
 }
